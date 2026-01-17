@@ -65,18 +65,21 @@ const App = () => {
 
   return (
     <main className="container py-4">
-      <header className="text-center">
-        <h1 className="display-5">Lista de Tareas</h1>
-        <p className="text-muted">React + Node + MongoDB</p>
-      </header>
+      <div className="notebook">
+        <div className="notebook-content"></div>
+        <header className="text-center">
+          <h1 className="display-5">Lista de Tareas</h1>
+          <p className="text-muted">React + Node + MongoDB</p>
+        </header>
 
-      <FormularioTarea agregarTarea={agregarTarea} />
+        <FormularioTarea agregarTarea={agregarTarea} />
 
-      <ListaTareas
-        tareas={tareas}
-        borrarTarea={borrarTarea}
-        iniciarEdicion={iniciarEdicion}
-      />
+        <ListaTareas
+          tareas={tareas}
+          borrarTarea={borrarTarea}
+          iniciarEdicion={iniciarEdicion}
+        />
+      </div>
     </main>
   );
 };
