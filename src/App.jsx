@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { Alert } from "react-bootstrap";
 import FormularioTarea from "./components/FormularioTarea";
 import ListaTareas from "./components/ListaTareas";
+import ModalEditarTarea from "./components/ModalEditarTarea";
 import {
   leerTareasApi,
   crearTareaApi,
@@ -11,13 +13,27 @@ import {
 const App = () => {
   const [tareas, setTareas] = useState([]);
 
+  // Modal
+  const [showModal, setShowModal] = useState(false);
+  const [tareaSeleccionada, setTareaSeleccionada] = useState(null);
+
+  // Alert global (errores de API)
+  const [mensajeError, setMensajeError] = useState("");
+
   const cargarTareas = async () => {
-    const respuesta = await leerTareasApi();
-    if (respuesta && respuesta.status === 200) {
-      const datos = await respuesta.json();
-      setTareas(datos);
-    } else {
-      console.error("Error al leer tareas");
+    try {
+      const respuesta = await leerTareasApi();
+
+      if (respuesta && respuesta.status === 200) {
+        const datos = await respuesta.json();
+        setTareas(datos);
+        setMensajeError("");
+      } else {
+        setMensajeError("No se pudieron cargar las tareas");
+      }
+    } catch (error) {
+      console.error(error);
+      setMensajeError("Error al conectar con el servidor");
     }
   };
 
@@ -26,41 +42,69 @@ const App = () => {
   }, []);
 
   const agregarTarea = async (texto) => {
-    // validación simple (después mejoramos con alert)
-    if (!texto || texto.trim().length < 2) {
-      return;
-    }
+    if (!texto || texto.trim().length < 2) return;
 
-    const respuesta = await crearTareaApi({ tarea: texto.trim() });
-    if (respuesta && respuesta.status === 201) {
-      cargarTareas();
-    } else {
-      const error = respuesta ? await respuesta.json() : null;
-      console.error("Error al crear tarea", error);
+    try {
+      const respuesta = await crearTareaApi({ tarea: texto.trim() });
+
+      if (respuesta && respuesta.status === 201) {
+        setMensajeError("");
+        cargarTareas();
+      } else {
+        const error = respuesta ? await respuesta.json() : null;
+        console.error(error);
+        setMensajeError("No se pudo crear la tarea");
+      }
+    } catch (error) {
+      console.error(error);
+      setMensajeError("Error al conectar con el servidor");
     }
   };
 
   const borrarTarea = async (id) => {
-    const respuesta = await borrarTareaApi(id);
-    if (respuesta && respuesta.status === 200) {
-      cargarTareas();
-    } else {
-      console.error("Error al borrar tarea");
+    try {
+      const respuesta = await borrarTareaApi(id);
+
+      if (respuesta && respuesta.status === 200) {
+        setMensajeError("");
+        cargarTareas();
+      } else {
+        setMensajeError("No se pudo borrar la tarea");
+      }
+    } catch (error) {
+      console.error(error);
+      setMensajeError("Error al conectar con el servidor");
     }
   };
 
-  const iniciarEdicion = async (tarea) => {
-    const nuevoTexto = prompt("Editar tarea:", tarea.tarea);
+  const iniciarEdicion = (tarea) => {
+    setTareaSeleccionada(tarea);
+    setShowModal(true);
+  };
 
-    if (!nuevoTexto) return;
+  const guardarEdicion = async (id, nuevoTexto) => {
+    try {
+      const respuesta = await editarTareaApi(id, { tarea: nuevoTexto });
 
-    const respuesta = await editarTareaApi(tarea._id, { tarea: nuevoTexto });
-    if (respuesta && respuesta.status === 200) {
-      cargarTareas();
-    } else {
-      const error = respuesta ? await respuesta.json() : null;
-      console.error("Error al editar tarea", error);
+      if (respuesta && respuesta.status === 200) {
+        setMensajeError("");
+        setShowModal(false);
+        setTareaSeleccionada(null);
+        cargarTareas();
+      } else {
+        const error = respuesta ? await respuesta.json() : null;
+        console.error(error);
+        setMensajeError("No se pudo editar la tarea");
+      }
+    } catch (error) {
+      console.error(error);
+      setMensajeError("Error al conectar con el servidor");
     }
+  };
+
+  const cerrarModal = () => {
+    setShowModal(false);
+    setTareaSeleccionada(null);
   };
 
   return (
@@ -70,12 +114,21 @@ const App = () => {
         <p className="text-muted">React + Node + MongoDB</p>
       </header>
 
+      {mensajeError && <Alert variant="danger">{mensajeError}</Alert>}
+
       <FormularioTarea agregarTarea={agregarTarea} />
 
       <ListaTareas
         tareas={tareas}
         borrarTarea={borrarTarea}
         iniciarEdicion={iniciarEdicion}
+      />
+
+      <ModalEditarTarea
+        show={showModal}
+        handleClose={cerrarModal}
+        tareaSeleccionada={tareaSeleccionada}
+        guardarEdicion={guardarEdicion}
       />
     </main>
   );
