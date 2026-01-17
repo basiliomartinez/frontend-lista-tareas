@@ -1,11 +1,19 @@
 import { useState } from "react";
-import { Form, Button } from "react-bootstrap";
+import { Form, Button, Alert } from "react-bootstrap";
 
 const FormularioTarea = ({ agregarTarea }) => {
   const [tarea, setTarea] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    agregarTarea(tarea);
+    setTarea("");
+    if (!tarea || tarea.trim().length < 2) {
+      setError("La tarea debe tener al menos 2 caracteres");
+      return;
+    }
+    setError("");
     agregarTarea(tarea);
     setTarea("");
   };
@@ -25,6 +33,7 @@ const FormularioTarea = ({ agregarTarea }) => {
         <Button variant="primary" type="submit">
           Agregar
         </Button>
+        {error && <Alert variant="danger">{error}</Alert>}
       </Form>
     </section>
   );
