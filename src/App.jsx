@@ -111,12 +111,14 @@ const App = () => {
     <main className="container py-4">
       <div className="notebook">
         <div className="notebook-content"></div>
+
         <header className="text-center">
           <h1 className="display-5">Lista de Tareas</h1>
           <p className="text-muted">React + Node + MongoDB</p>
         </header>
 
- feature/ui-notebook-style
+        {mensajeError && <Alert variant="danger">{mensajeError}</Alert>}
+
         <FormularioTarea agregarTarea={agregarTarea} />
 
         <ListaTareas
@@ -124,25 +126,14 @@ const App = () => {
           borrarTarea={borrarTarea}
           iniciarEdicion={iniciarEdicion}
         />
+
+        <ModalEditarTarea
+          show={showModal}
+          handleClose={cerrarModal}
+          tareaSeleccionada={tareaSeleccionada}
+          guardarEdicion={guardarEdicion}
+        />
       </div>
-
-      {mensajeError && <Alert variant="danger">{mensajeError}</Alert>}
-
-      <FormularioTarea agregarTarea={agregarTarea} />
-
-      <ListaTareas
-        tareas={tareas}
-        borrarTarea={borrarTarea}
-        iniciarEdicion={iniciarEdicion}
-      />
-
-      <ModalEditarTarea
-        show={showModal}
-        handleClose={cerrarModal}
-        tareaSeleccionada={tareaSeleccionada}
-        guardarEdicion={guardarEdicion}
-      />
- dev
     </main>
   );
 };
