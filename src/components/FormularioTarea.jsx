@@ -7,14 +7,14 @@ const FormularioTarea = ({ agregarTarea }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    agregarTarea(tarea);
-    setTarea("");
+
     if (!tarea || tarea.trim().length < 2) {
       setError("La tarea debe tener al menos 2 caracteres");
       return;
     }
+
     setError("");
-    agregarTarea(tarea);
+    agregarTarea(tarea.trim());
     setTarea("");
   };
 
@@ -30,10 +30,12 @@ const FormularioTarea = ({ agregarTarea }) => {
             onChange={(e) => setTarea(e.target.value)}
           />
         </Form.Group>
+
         <Button variant="primary" type="submit">
           Agregar
         </Button>
-        {error && <Alert variant="danger">{error}</Alert>}
+
+        {error && <Alert className="mt-3" variant="danger">{error}</Alert>}
       </Form>
     </section>
   );
